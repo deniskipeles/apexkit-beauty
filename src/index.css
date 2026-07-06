@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", "Inter", sans-serif;
+  
+  /* Rich warm salon colors: Bronze, Terracotta, Champagne, Charcoal */
+  --color-gold-50: #fcfbf7;
+  --color-gold-100: #f6f3e8;
+  --color-gold-200: #ebdcc2;
+  --color-gold-300: #dac094;
+  --color-gold-400: #c5a880; /* Premium Brand Accent */
+  --color-gold-500: #b09168;
+  --color-gold-600: #967851;
+  --color-gold-700: #7b603f;
+  --color-gold-800: #624b33;
+  --color-gold-900: #503d2a;
+  
+  --color-bronze-500: #c28859;
+  --color-bronze-600: #a36f45;
+  --color-bronze-700: #835532;
+  
+  --color-cream: #fbf9f6;
+  --color-charcoal: #121212;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream);
+  color: var(--color-charcoal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-200);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-400);
+}

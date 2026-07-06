@@ -1,0 +1,6 @@
+{
+  "name": "Saloon Booking",
+  "description": "A professional salon booking application for scheduling appointments, viewing hair styles and pricing, and exploring stylist portfolios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
