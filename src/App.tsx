@@ -7,6 +7,7 @@ import StylesCatalog from './pages/StylesCatalog';
 import StylistPortfolios from './pages/StylistPortfolios';
 import Scheduler from './components/Scheduler';
 import AppointmentsDashboard from './pages/AppointmentsDashboard';
+import AdminDashboard from './pages/AdminDashboard'; // [ADDED]
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { beautyService } from './lib/client';
@@ -73,6 +74,9 @@ export default function App() {
                 />
               } 
             />
+
+            {/* Admin Management Dashboard */}
+            <Route path="/admin" element={<AdminDashboard />} />
             
             <Route 
               path="/login" 

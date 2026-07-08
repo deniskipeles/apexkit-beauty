@@ -1,4 +1,4 @@
-import { ApexKit, User, BaseRecord, AuthResponse } from './apexkit';
+import { ApexKit, User, BaseRecord, AuthResponse } from '@apexkit/sdk';
 import { 
   Hairstyle, 
   Stylist, 
@@ -71,10 +71,8 @@ class BeautyService {
       return this.getLocalHairstyles();
     }
     try {
-      // Attempt to query from ApexKit collections
       const res = await sdk.collection('hairstyles').list({ per_page: 50 });
       if (res && res.items && res.items.length > 0) {
-        // Map records
         return res.items.map((item: any) => ({
           id: String(item.id || item.record_id),
           name: item.name || item.data?.name,
@@ -86,12 +84,80 @@ class BeautyService {
           features: Array.isArray(item.features || item.data?.features) ? (item.features || item.data?.features) : []
         }));
       }
-      // If collection empty or invalid, fall back to local seed data
       return this.getLocalHairstyles();
     } catch (e) {
-      console.warn('Hairstyles collection failed or does not exist. Falling back gracefully.', e);
+      console.warn('Hairstyles collection failed or does not exist. Using fallback.', e);
       this.isUsingFallback = true;
       return this.getLocalHairstyles();
+    }
+  }
+
+  // Create Hairstyle
+  public async createHairstyle(style: Omit<Hairstyle, 'id'>): Promise<Hairstyle> {
+    const newId = 'hs-' + Math.random().toString(36).substr(2, 9);
+    const item: Hairstyle = { ...style, id: newId };
+
+    if (this.isUsingFallback) {
+      const current = this.getLocalHairstyles();
+      current.push(item);
+      localStorage.setItem(LOCAL_HAIRSTYLES_KEY, JSON.stringify(current));
+      return item;
+    }
+
+    try {
+      const res = await sdk.collection('hairstyles').create(style);
+      return {
+        id: String(res?.id || newId),
+        ...style
+      };
+    } catch (e) {
+      console.warn('Failed to save hairstyle to cloud, writing locally.', e);
+      const current = this.getLocalHairstyles();
+      current.push(item);
+      localStorage.setItem(LOCAL_HAIRSTYLES_KEY, JSON.stringify(current));
+      return item;
+    }
+  }
+
+  // Update Hairstyle
+  public async updateHairstyle(id: string, style: Partial<Hairstyle>): Promise<boolean> {
+    if (this.isUsingFallback) {
+      const current = this.getLocalHairstyles();
+      const updated = current.map(item => item.id === id ? { ...item, ...style } : item);
+      localStorage.setItem(LOCAL_HAIRSTYLES_KEY, JSON.stringify(updated));
+      return true;
+    }
+
+    try {
+      await sdk.collection('hairstyles').patch(id, style);
+      return true;
+    } catch (e) {
+      console.warn('Failed to update cloud hairstyle, updating locally.', e);
+      const current = this.getLocalHairstyles();
+      const updated = current.map(item => item.id === id ? { ...item, ...style } : item);
+      localStorage.setItem(LOCAL_HAIRSTYLES_KEY, JSON.stringify(updated));
+      return true;
+    }
+  }
+
+  // Delete Hairstyle
+  public async deleteHairstyle(id: string): Promise<boolean> {
+    if (this.isUsingFallback) {
+      const current = this.getLocalHairstyles();
+      const updated = current.filter(item => item.id !== id);
+      localStorage.setItem(LOCAL_HAIRSTYLES_KEY, JSON.stringify(updated));
+      return true;
+    }
+
+    try {
+      await sdk.collection('hairstyles').delete(id);
+      return true;
+    } catch (e) {
+      console.warn('Failed to delete cloud hairstyle, deleting locally.', e);
+      const current = this.getLocalHairstyles();
+      const updated = current.filter(item => item.id !== id);
+      localStorage.setItem(LOCAL_HAIRSTYLES_KEY, JSON.stringify(updated));
+      return true;
     }
   }
 
@@ -118,9 +184,107 @@ class BeautyService {
       }
       return this.getLocalStylists();
     } catch (e) {
-      console.warn('Stylists collection failed or does not exist. Falling back gracefully.', e);
+      console.warn('Stylists collection failed or does not exist. Using fallback.', e);
       this.isUsingFallback = true;
       return this.getLocalStylists();
+    }
+  }
+
+  // Create Stylist
+  public async createStylist(stylist: Omit<Stylist, 'id'>): Promise<Stylist> {
+    const newId = 'st-' + Math.random().toString(36).substr(2, 9);
+    const item: Stylist = { ...stylist, id: newId };
+
+    if (this.isUsingFallback) {
+      const current = this.getLocalStylists();
+      current.push(item);
+      localStorage.setItem(LOCAL_STYLISTS_KEY, JSON.stringify(current));
+      return item;
+    }
+
+    try {
+      const res = await sdk.collection('stylists').create(stylist);
+      return {
+        id: String(res?.id || newId),
+        ...stylist
+      };
+    } catch (e) {
+      console.warn('Failed to save stylist to cloud, writing locally.', e);
+      const current = this.getLocalStylists();
+      current.push(item);
+      localStorage.setItem(LOCAL_STYLISTS_KEY, JSON.stringify(current));
+      return item;
+    }
+  }
+
+  // Update Stylist
+  public async updateStylist(id: string, stylist: Partial<Stylist>): Promise<boolean> {
+    if (this.isUsingFallback) {
+      const current = this.getLocalStylists();
+      const updated = current.map(item => item.id === id ? { ...item, ...stylist } : item);
+      localStorage.setItem(LOCAL_STYLISTS_KEY, JSON.stringify(updated));
+      return true;
+    }
+
+    try {
+      await sdk.collection('stylists').patch(id, stylist);
+      return true;
+    } catch (e) {
+      console.warn('Failed to update cloud stylist, updating locally.', e);
+      const current = this.getLocalStylists();
+      const updated = current.map(item => item.id === id ? { ...item, ...stylist } : item);
+      localStorage.setItem(LOCAL_STYLISTS_KEY, JSON.stringify(updated));
+      return true;
+    }
+  }
+
+  // Delete Stylist
+  public async deleteStylist(id: string): Promise<boolean> {
+    if (this.isUsingFallback) {
+      const current = this.getLocalStylists();
+      const updated = current.filter(item => item.id !== id);
+      localStorage.setItem(LOCAL_STYLISTS_KEY, JSON.stringify(updated));
+      return true;
+    }
+
+    try {
+      await sdk.collection('stylists').delete(id);
+      return true;
+    } catch (e) {
+      console.warn('Failed to delete cloud stylist, deleting locally.', e);
+      const current = this.getLocalStylists();
+      const updated = current.filter(item => item.id !== id);
+      localStorage.setItem(LOCAL_STYLISTS_KEY, JSON.stringify(updated));
+      return true;
+    }
+  }
+
+  // Fetch All Appointments (Administrative)
+  public async adminGetAppointments(): Promise<Appointment[]> {
+    if (this.isUsingFallback) {
+      return this.getLocalAppointmentsAll();
+    }
+    try {
+      const res = await sdk.collection('appointments').list({ per_page: 100 });
+      if (res && res.items) {
+        return res.items.map((item: any) => ({
+          id: String(item.id || item.record_id),
+          serviceId: item.serviceId || item.data?.serviceId || '',
+          stylistId: item.stylistId || item.data?.stylistId || '',
+          date: item.date || item.data?.date || '',
+          time: item.time || item.data?.time || '',
+          customerName: item.customerName || item.data?.customerName || '',
+          customerEmail: item.customerEmail || item.data?.customerEmail || '',
+          customerPhone: item.customerPhone || item.data?.customerPhone || '',
+          notes: item.notes || item.data?.notes || '',
+          status: (item.status || item.data?.status || 'upcoming') as 'upcoming' | 'completed' | 'cancelled',
+          priceAtBooking: Number(item.priceAtBooking || item.data?.priceAtBooking || 0)
+        }));
+      }
+      return this.getLocalAppointmentsAll();
+    } catch (e) {
+      console.warn('Failed to query all appointments remotely, falling back to local files.', e);
+      return this.getLocalAppointmentsAll();
     }
   }
 
@@ -130,7 +294,6 @@ class BeautyService {
       return this.getLocalAppointments(email);
     }
     try {
-      // Find appointments matching customer's email
       const res = await sdk.collection('appointments').list({ 
         per_page: 100,
         filter: { customerEmail: email }
@@ -152,7 +315,7 @@ class BeautyService {
       }
       return this.getLocalAppointments(email);
     } catch (e) {
-      console.warn('Appointments collection failed or does not exist. Falling back gracefully.', e);
+      console.warn('Appointments collection failed or does not exist. Using fallback.', e);
       this.isUsingFallback = true;
       return this.getLocalAppointments(email);
     }
@@ -172,7 +335,6 @@ class BeautyService {
     }
 
     try {
-      // Attempt to save to ApexKit
       const res = await sdk.collection('appointments').create(completeApp);
       if (res) {
         return {
@@ -233,11 +395,12 @@ class BeautyService {
       throw new Error('Invalid login payload');
     } catch (e) {
       console.warn('Remote auth login failed. Falling back to local auth simulation.', e);
-      // Simulate local auth
+      // Simulate local auth - Admin fallback detection
+      const isMockAdmin = email.toLowerCase().includes('admin');
       const mockUser: User = {
         id: 'usr-' + Math.random().toString(36).substr(2, 9),
         email: email,
-        role: 'customer',
+        role: isMockAdmin ? 'admin' : 'customer',
         scope: 'tenant:apex-beauty',
         metadata: { name: email.split('@')[0] }
       };
@@ -260,11 +423,11 @@ class BeautyService {
       throw new Error('Invalid register response');
     } catch (e) {
       console.warn('Remote auth registration failed. Falling back to local registration simulation.', e);
-      // Simulate local register
+      const isMockAdmin = email.toLowerCase().includes('admin');
       const mockUser: User = {
         id: 'usr-' + Math.random().toString(36).substr(2, 9),
         email: email,
-        role: 'customer',
+        role: isMockAdmin ? 'admin' : 'customer',
         scope: 'tenant:apex-beauty',
         metadata: { name }
       };
@@ -309,7 +472,7 @@ class BeautyService {
 
   private saveLocalAppointment(app: Appointment) {
     const all = this.getLocalAppointmentsAll();
-    all.unshift(app); // Prepend new bookings
+    all.unshift(app);
     localStorage.setItem(LOCAL_APPOINTMENTS_KEY, JSON.stringify(all));
   }
 }

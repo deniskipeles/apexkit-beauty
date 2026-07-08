@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Scissors, User as UserIcon, LogOut, Calendar, Menu, X, ShieldAlert } from 'lucide-react';
+import { Scissors, User as UserIcon, LogOut, Calendar, Menu, X, ShieldAlert, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { beautyService } from '../lib/client';
 
@@ -15,6 +15,7 @@ export default function Header({ user, onLogout, isFallback }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+  const isAdmin = user?.role === 'admin';
 
   return (
     <header className="sticky top-0 z-50 bg-cream/90 backdrop-blur-md border-b border-gold-200/40">
@@ -68,6 +69,17 @@ export default function Header({ user, onLogout, isFallback }: HeaderProps) {
             >
               Our Stylists
             </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`flex items-center gap-1 font-semibold text-sm tracking-wide transition-colors duration-200 ${
+                  isActive('/admin') ? 'text-gold-600' : 'text-gold-500 hover:text-gold-600'
+                }`}
+              >
+                <Settings className="w-4 h-4 animate-spin-slow" />
+                <span>Admin Operations</span>
+              </Link>
+            )}
           </nav>
 
           {/* User Auth Controls / Call To Action */}
@@ -157,6 +169,17 @@ export default function Header({ user, onLogout, isFallback }: HeaderProps) {
           >
             Our Stylists
           </Link>
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`py-2 text-base font-semibold text-gold-600 flex items-center gap-1.5`}
+            >
+              <Settings className="w-4 h-4" />
+              <span>Admin Operations</span>
+            </Link>
+          )}
 
           <hr className="border-gold-200/30" />
 
